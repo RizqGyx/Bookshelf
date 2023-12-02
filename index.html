@@ -56,27 +56,62 @@
     
     <section class="py-10">
         <div class="mx-auto max-w-7xl p-1">
-            <form id="bookForm">
-                <input type="text" id="title" placeholder="Judul Buku" required>
-                <input type="text" id="author" placeholder="Penulis" required>
-                <input type="text" pattern="[0-9]*" inputmode="numeric" id="year" placeholder="Tahun Terbit" required>
-                <input type="url" id="coverURL" placeholder="URL Cover" required>
-                <label for="isRead">Sudah dibaca?</label>
-                <input type="checkbox" id="isRead">
-                <button type="button" onclick="addBook()">Tambahkan Buku</button>
-            </form>
+            <button id="toggleFormBtn" class="bg-blue-400 font-bold w-full text-white rounded-full text-2xl p-2">Tambah Buku <span class="fas fa-plus"></span></button>
+            <div class="flex justify-around flex-row" style="display: none;" id="form">
+                <form id="bookForm" class="w-[40%] text-black">
+                    <label class="form-control w-full max-w-md">
+                        <div class="label">
+                          <span class="label-text text-blue-700">Judul Buku:</span>
+                          <span class="label-text-alt text-xl text-red-500">*</span>
+                        </div>
+                        <input type="text" placeholder="ex: Bumi" id="title" class="input input-bordered w-full max-w-md bg-white" required/>
+                    </label>
+                    <label class="form-control w-full max-w-md">
+                        <div class="label">
+                          <span class="label-text text-blue-700">Penerbit:</span>
+                          <span class="label-text-alt text-xl text-red-500">*</span>
+                        </div>
+                        <input type="text" placeholder="ex: Tere Liye" id="author" class="input input-bordered w-full max-w-md bg-white" required/>
+                    </label>
+                    <label class="form-control w-full max-w-md">
+                        <div class="label">
+                          <span class="label-text text-blue-700">Tahun Terbit:</span>
+                          <span class="label-text-alt text-xl text-red-500">*</span>
+                        </div>
+                        <input type="text" placeholder="ex: 2023" id="year" class="input input-bordered w-full max-w-md bg-white" required/>
+                    </label>
+                    <label class="form-control w-full max-w-md">
+                        <div class="label">
+                          <span class="label-text text-blue-700">Cover:</span>
+                          <span class="label-text-alt text-xl text-red-500">*</span>
+                        </div>
+                        <input type="url" placeholder="ex: https://placeholder.com/100" id="coverURL" class="input input-bordered w-full max-w-md bg-white" required/>
+                    </label>
+                    <div class="form-control w-full max-w-md">
+                        <label class="cursor-pointer label ">
+                          <span class="label-text text-blue-700">Sudah Dibaca?</span>
+                          <input type="checkbox" id="isRead" class="checkbox checkbox-info" />
+                        </label>
+                    </div>
+                    <button type="button" class="btn btn-wide bg-blue-500 text-white border-none hover:bg-blue-700 w-full max-w-md" onclick="addBook()">Tambahkan Buku</button>
+                </form>
+                <img src="./assets/Novel.jpg" alt="Book" class="w-[40%]"/>
+            </div>
+            
+            <div class="join w-full mt-10">
+                <input class="input input-bordered join-item w-[100%] bg-white text-blue-600 shadow-xl" type="text" id="searchInput" placeholder="Cari berdasarkan judul" aria-label="Search"/>
+                <button class="btn join-item rounded-r-full bg-blue-400 text-white border-0 hover:bg-blue-600">Search</button>
+            </div>
           
-            <input type="text" id="searchInput" placeholder="Cari berdasarkan judul" aria-label="Search" class="my-1 w-full"/>
-          
-            <div class="justify-between w-full gap-2 sm:flex-col sm:flex md:flex-row">
-                <div class="sm:w-full md:w-1/2">
+            <div class="justify-between w-full gap-2 sm:flex-col sm:flex md:flex-row mt-3">
+                <div class="sm:w-full md:w-1/2 text-black">
                     <h2 class="text-center text-2xl text-blue-400 font-bold border-4 border-blue-400 rounded-full">Sudah Dibaca</h2>
-                    <div id="readBooks" class="bookshelf py-3"></div>
+                    <div id="readBooks" class="bookshelf py-3 mx-5"></div>
                 </div>
                 
-                <div class="sm:w-full md:w-1/2">
+                <div class="sm:w-full md:w-1/2 text-black">
                     <h2 class="text-center text-2xl text-blue-400 font-bold border-4 border-blue-400 rounded-full">Belum Dibaca</h2>
-                    <div id="unreadBooks" class="bookshelf py-3"></div>
+                    <div id="unreadBooks" class="bookshelf py-3 mx-5"></div>
                 </div>
             </div>
 

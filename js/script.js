@@ -8,6 +8,23 @@ function addBook() {
     const isRead = document.getElementById('isRead').checked;
     const coverUrl = document.getElementById('coverURL').value;
 
+    function validate() {
+        if (title === '' || author === '' || year === '' || coverUrl === '') {
+            alert('Harap isi semua bidang sebelum menambahkan buku.');
+            return false;
+        }
+    
+        if (isNaN(year) || year.length !== 4) {
+            alert('Masukkan tahun terbit yang valid (format: YYYY).');
+            return false;
+        }
+        return true;
+    }
+
+    if (!validate()) {
+        return;
+    }
+    
     const newBook = {
         title,
         author,
@@ -18,12 +35,107 @@ function addBook() {
 
     if (isRead) {
         readBooks.push(newBook);
+        saveToLocalStorage('readBooks', readBooks);
     } else {
         unreadBooks.push(newBook);
+        saveToLocalStorage('unreadBooks', unreadBooks);
     }
 
+    saveToLocalStorage();
     renderBookshelf();
     clearForm();
+}
+
+function saveToLocalStorage() {
+    localStorage.setItem('readBooks', JSON.stringify(readBooks));
+    localStorage.setItem('unreadBooks', JSON.stringify(unreadBooks));
+}
+
+function loadFromLocalStorage() {
+    const storedReadBooks = JSON.parse(localStorage.getItem('readBooks'));
+    const storedUnreadBooks = JSON.parse(localStorage.getItem('unreadBooks'));
+
+    if (storedReadBooks) {
+        readBooks.push(...storedReadBooks);
+    }
+
+    if (storedUnreadBooks) {
+        unreadBooks.push(...storedUnreadBooks);
+    }
+}
+
+function createBookElement(book, shelf) {
+    const bookCard = document.createElement('div');
+    bookCard.classList.add('book-card');
+
+    const infoWrapper = document.createElement('div');
+    infoWrapper.classList.add('wrapper', 'justify-evenly');
+
+    const cover = document.createElement('img');
+    cover.setAttribute('height', '500px');
+    cover.setAttribute('width', '250px');
+    cover.src = book.coverUrl;
+    cover.alt = `Cover buku ${book.title}`;
+    infoWrapper.appendChild(cover);
+
+    const bookInfo = document.createElement('div');
+    bookInfo.classList.add('book-info', 'px-5');
+
+    const title = document.createElement('h3');
+    title.textContent = book.title;
+
+    const author = document.createElement('p');
+    author.textContent = `Penulis: ${book.author}`;
+
+    const year = document.createElement('p');
+    year.textContent = `Tahun Terbit: ${book.year}`;
+
+    bookInfo.appendChild(title);
+    bookInfo.appendChild(author);
+    bookInfo.appendChild(year);
+
+    const editButton = document.createElement('button');
+    editButton.textContent = 'Edit';
+    editButton.classList.add('px-5', 'py-2', 'bg-blue-400');
+    editButton.addEventListener('click', function() {
+        populateForm(book);
+        bookForm.style.display = 'flex';
+    });
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+        deleteButton.classList.add('px-5', 'py-2', 'bg-red-400');
+        deleteButton.addEventListener('click', function() {
+            removeFromShelf(book, shelf);
+            renderBookshelf();
+        });
+
+    const redoButton = document.createElement('button');
+    redoButton.textContent = 'Redo';
+    redoButton.classList.add('px-5', 'py-2', 'bg-lime-400');
+    redoButton.addEventListener('click', function() {
+        redoBook(book);
+    });
+
+    const completeButton = document.createElement('button');
+    completeButton.textContent = 'Complete';
+    completeButton.classList.add('px-5', 'py-2', 'bg-lime-400');
+    completeButton.addEventListener('click', function() {
+        completeBook(book);
+    });
+
+    if (shelf === 'read') {
+        bookInfo.appendChild(redoButton);
+    } else {
+        bookInfo.appendChild(completeButton);
+    }
+    
+    bookInfo.appendChild(editButton);
+    bookInfo.appendChild(deleteButton);
+    infoWrapper.appendChild(bookInfo);
+    bookCard.appendChild(infoWrapper);
+
+    return bookCard;
 }
 
 function renderBookshelf() {
@@ -33,55 +145,6 @@ function renderBookshelf() {
 
     readBookshelf.innerHTML = '';
     unreadBookshelf.innerHTML = '';
-
-    function createBookElement(book, shelf) {
-        const bookCard = document.createElement('div');
-        bookCard.classList.add('book-card');
-
-        const infoWrapper = document.createElement('div');
-        infoWrapper.classList.add('wrapper')
-    
-        const cover = document.createElement('img');
-        cover.src = book.coverUrl;
-        cover.alt = `Cover buku ${book.title}`;
-        infoWrapper.appendChild(cover);
-    
-        const bookInfo = document.createElement('div');
-        bookInfo.classList.add('book-info');
-    
-        const title = document.createElement('h3');
-        title.textContent = book.title;
-    
-        const author = document.createElement('p');
-        author.textContent = `Penulis: ${book.author}`;
-    
-        const year = document.createElement('p');
-        year.textContent = `Tahun Terbit: ${book.year}`;
-    
-        bookInfo.appendChild(title);
-        bookInfo.appendChild(author);
-        bookInfo.appendChild(year);
-    
-        const actionButton = document.createElement('button');
-        if (shelf === 'read') {
-            actionButton.textContent = 'Edit';
-            actionButton.addEventListener('click', function() {
-                populateForm(book);
-            });
-        } else {
-            actionButton.textContent = 'Delete';
-            actionButton.addEventListener('click', function() {
-                removeFromShelf(book, shelf);
-                renderBookshelf();
-            });
-        }
-        
-        bookInfo.appendChild(actionButton);
-        infoWrapper.appendChild(bookInfo);
-        bookCard.appendChild(infoWrapper);
-    
-        return bookCard;
-    }
 
     readBooks.forEach(book => {
         if (book.title.toLowerCase().includes(searchInput)) {
@@ -98,13 +161,31 @@ function renderBookshelf() {
     });
 }
 
+function redoBook(book) {
+    book.isRead = false;
+    unreadBooks.push(book);
+    removeFromShelf(book, 'read');
+    saveToLocalStorage('unreadBooks', unreadBooks);
+    renderBookshelf();
+}
+
+function completeBook(book) {
+    book.isRead = true;
+    readBooks.push(book);
+    removeFromShelf(book, 'unread');
+    saveToLocalStorage('readBooks', readBooks);
+    renderBookshelf();
+}
+
 function removeFromShelf(book, shelf) {
     if (shelf === 'read') {
         const index = readBooks.indexOf(book);
         readBooks.splice(index, 1);
+        saveToLocalStorage('readBooks', readBooks);
     } else {
         const index = unreadBooks.indexOf(book);
         unreadBooks.splice(index, 1);
+        saveToLocalStorage('unreadBooks', unreadBooks);
     }
 }
 
@@ -114,6 +195,23 @@ function clearForm() {
     document.getElementById('year').value = '';
     document.getElementById('isRead').checked = false;
     document.getElementById('coverURL').value = '';
+}
+
+function saveToLocalStorage(key, value) {
+    localStorage.setItem(key, JSON.stringify(value));
+}
+
+function loadFromLocalStorage() {
+    const storedReadBooks = JSON.parse(localStorage.getItem('readBooks'));
+    const storedUnreadBooks = JSON.parse(localStorage.getItem('unreadBooks'));
+
+    if (storedReadBooks) {
+        readBooks.push(...storedReadBooks);
+    }
+
+    if (storedUnreadBooks) {
+        unreadBooks.push(...storedUnreadBooks);
+    }
 }
 
 function populateForm(book) {
@@ -133,5 +231,17 @@ function searchByTitle() {
 
 document.addEventListener('DOMContentLoaded', function () {
     searchByTitle();
+    loadFromLocalStorage();
     renderBookshelf();
+});
+
+const toggleFormBtn = document.getElementById('toggleFormBtn');
+const bookForm = document.getElementById('form');
+
+toggleFormBtn.addEventListener('click', function() {
+    if (bookForm.style.display === 'none') {
+        bookForm.style.display = 'flex';
+    } else {
+        bookForm.style.display = 'none';
+    }
 });
