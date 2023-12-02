@@ -1,21 +1,20 @@
 const readBooks = [];
 const unreadBooks = [];
+let bookId = 1;
 
 function addBook() {
     const title = document.getElementById('title').value;
     const author = document.getElementById('author').value;
-    const year = document.getElementById('year').value;
+    const year = parseInt(document.getElementById('year').value);
     const isRead = document.getElementById('isRead').checked;
-    const coverUrl = document.getElementById('coverURL').value;
+    let coverUrl = document.getElementById('coverURL').value;
+
+    const noImageUrl = 'https://placeholder.com/230x340?text=Novel';
+    coverUrl = coverUrl.trim() !== '' ? coverUrl : noImageUrl;
 
     function validate() {
-        if (title === '' || author === '' || year === '' || coverUrl === '') {
-            alert('Harap isi semua bidang sebelum menambahkan buku.');
-            return false;
-        }
-    
-        if (isNaN(year) || year.length !== 4) {
-            alert('Masukkan tahun terbit yang valid (format: YYYY).');
+        if (title === '' || author === '' || isNaN(year) || year.toString().length !== 4) {
+            alert('Harap isi semua bidang dengan benar sebelum menambahkan buku dan masukkan sesuai contoh');
             return false;
         }
         return true;
@@ -26,6 +25,7 @@ function addBook() {
     }
     
     const newBook = {
+        id: bookId++,
         title,
         author,
         year,
@@ -135,6 +135,8 @@ function createBookElement(book, shelf) {
     infoWrapper.appendChild(bookInfo);
     bookCard.appendChild(infoWrapper);
 
+    bookCard.classList.add('mt-5');
+
     return bookCard;
 }
 
@@ -179,14 +181,21 @@ function completeBook(book) {
 
 function removeFromShelf(book, shelf) {
     if (shelf === 'read') {
-        const index = readBooks.indexOf(book);
-        readBooks.splice(index, 1);
+        readBooks.forEach((item, index) => {
+            if (item.id === book.id) {
+                readBooks.splice(index, 1);
+            }
+        });
         saveToLocalStorage('readBooks', readBooks);
     } else {
-        const index = unreadBooks.indexOf(book);
-        unreadBooks.splice(index, 1);
+        unreadBooks.forEach((item, index) => {
+            if (item.id === book.id) {
+                unreadBooks.splice(index, 1);
+            }
+        });
         saveToLocalStorage('unreadBooks', unreadBooks);
     }
+    renderBookshelf();
 }
 
 function clearForm() {
